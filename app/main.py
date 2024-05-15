@@ -6,6 +6,11 @@ from pydantic import BaseModel
 
 from random import randrange
 
+import psycopg2
+# import just the values of the columns without name
+from psycopg2.extras import RealDictCursor
+import time
+
 app = FastAPI()
 
 
@@ -13,7 +18,19 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
+
+
+while True :
+    try:
+        conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', password='postgres', cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
+        print('Database connection was succesfull !!!')
+        break
+    except Exception as e:
+        print('connection to DB failed')
+        print('Error', f'e')
+        time.sleep(2)
+
 
 my_posts = [{"title": "title of post 1", "content": "content of post 1", "id": 1},
             {"title": "favorite food", "content": "i like pizza", "id": 2}
@@ -38,16 +55,29 @@ async def root():
 
 @app.get("/posts")
 async def get_post():
-    return {"data": my_posts}
+    cursor.execute("""  
+            SELECT * FROM posts
+    """)
+    posts = cursor.fetchall()
+    print(posts)
+    return {"data": posts}
 
+
+# @app.post("/posts", status_code=status.HTTP_201_CREATED)
+# async def create_posts(post : Post):
+#     post_dict = post.dict()
+#     post_dict['id'] = randrange(0, 100000)
+
+#     my_posts.append(post_dict)
+#     return {"data": post_dict}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 async def create_posts(post : Post):
-    post_dict = post.dict()
-    post_dict['id'] = randrange(0, 100000)
-
-    my_posts.append(post_dict)
-    return {"data": post_dict}
+    cursor.execute(
+        """ insert into posts (tittle, content) values (%s, %s) RETURNING * """, (post.title, post.content)
+    )
+    post_p = cursor.fetchall()
+    return {"data": post_p}
 
 # read the last post : fait attention à la hierachie dans le code 
 # @app.get("/posts/last_post")
