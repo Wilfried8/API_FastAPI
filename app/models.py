@@ -1,29 +1,29 @@
-from uuid import UUID, uuid4
-from pydantic import BaseModel
-from typing import Optional, List
-from enum import Enum
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, TIMESTAMP
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.sql.expression import text
+
+from .database import Base
 
 
-class Gender(str, Enum):
-    male = "male"
-    female = "female"
+class Posts(Base):
+    __tablename__ = "posts"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String,nullable=False)
+    content = Column(String, nullable=False)
+    published = Column(Boolean, server_default='TRUE', nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()') )
+
+#     items = relationship("Item", back_populates="owner")
 
 
-class Role(str, Enum):
-    admin = "admin"
-    user = "user"
-    student = "student"
+# class Item(Base):
+#     __tablename__ = "items"
 
+#     id = Column(Integer, primary_key=True)
+#     title = Column(String, index=True)
+#     description = Column(String, index=True)
+#     owner_id = Column(Integer, ForeignKey("users.id"))
 
-class User(BaseModel):
-    id: Optional[UUID] = uuid4()
-    first_name: str
-    last_name: str
-    middle_name: Optional[str]
-    gender: Gender
-    role: List[Role]
-
-
-class User2(BaseModel):
-    nom: str
-    age: int
+#     owner = relationship("User", back_populates="items")
