@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from fastapi import FastAPI, Body, Response, status, HTTPException, Depends
 
 from fastapi.params import Body
@@ -10,20 +10,13 @@ import psycopg2
 # import just the values of the columns without name
 from psycopg2.extras import RealDictCursor
 import time
-from . import models
+from . import models, schema
 from .database import engine, get_db
 from sqlalchemy.orm import Session
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-
 
 while True :
     try:
@@ -57,45 +50,39 @@ def find_index_post(id):
 async def root():
     return {"message": "welcome wil"}
 
-@app.get("/sqlal")
-async def test_post(db: Session = Depends(get_db)):
+# @app.get("/sqlal")
+# async def test_post(db: Session = Depends(get_db)):
 
-    post = db.query(models.Posts).all()
-    return {"status" : post }
+#     post = db.query(models.Posts)
+#     print(post)
+#     return {"status" : post.all() }
 
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schema.Post])
 async def get_post(db: Session = Depends(get_db)):
     # cursor.execute("""  
     #         SELECT * FROM posts
     # """)
     # posts = cursor.fetchall()
     posts = db.query(models.Posts).all()
-    print(posts)
-    return {"data": posts}
+    return posts
 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-async def create_posts(post : Post, db: Session = Depends(get_db)):
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schema.Post)
+async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute(
     #     """ insert into posts (title, content) values (%s, %s) RETURNING * """, (post.title, post.content)
     # )
     # post_p = cursor.fetchall()
     # conn.commit()
-    create_post = models.Posts(title=post.title, content=post.content)
+    #print(**post.dict())
+    create_post = models.Posts(**post.dict())
     db.add(create_post)
     db.commit()
     db.refresh(create_post)
-    return {"data": create_post}
+    return create_post
 
-# read the last post : fait attention à la hierachie dans le code 
-# @app.get("/posts/last_post")
-# async def get_latest_post():
-#     post_last = find_post(len(my_posts))
-#     return {"detail": post_last}
-
-
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=schema.Post)
 async def get_post(id: int, db: Session = Depends(get_db)):
     # cursor.execute(
     #     """ SELECT * FROM posts WHERE id = %s RETURNING * """, (id,)
@@ -103,10 +90,11 @@ async def get_post(id: int, db: Session = Depends(get_db)):
     # g_post_id = cursor.fetchone()
 
     get_post_by_id = db.query(models.Posts).filter(models.Posts.id == id).first()
+    
     if get_post_by_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail= f"post with the id : {id} was not found")
-    return {"post_detail" : get_post_by_id}
+    return get_post_by_id
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -115,29 +103,39 @@ async def delete_post(id: int, db: Session = Depends(get_db)):
     #     """DELETE FROM posts WHERE id = %s""", (id,)
     # )
     # conn.commit()
-    del_post_by_id = db.query(models.Posts).filter(models.Posts.id == id).delete()
-    db.commit()
-    print(del_post_by_id)
-    if del_post_by_id == 0:
+    del_post_by_id = db.query(models.Posts).filter(models.Posts.id == id)
+    if del_post_by_id.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail= f"post with the id : {id} doesn't exist")
+    del_post_by_id.delete(synchronize_session=False)
+    db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.put("/posts/{id}")
-async def update_post(id: int, post: Post, db: Session = Depends(get_db)):
+@app.put("/posts/{id}", response_model=schema.Post)
+async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute(
     #     """ UPDATE posts SET tittle = %s WHERE id = %s RETURNING *""", (post.title, id)
     # )
     # update_post = cursor.fetchone()
     # conn.commit()
-    update_post_by_id = db.query(models.Posts).filter(models.Posts.id==id).first()
+    update_post_by_id = db.query(models.Posts).filter(models.Posts.id==id)
     print(update_post_by_id)
-    if  update_post_by_id is None:
+    if  update_post_by_id.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail= f"post with the id : {id} doesn't exist")
-    update_post_by_id.title = post.title
-    update_post_by_id.content = post.content
-    db.commit()
-    return {"message" : update_post_by_id}
+    # update_post_by_id.title = post.title
+    # update_post_by_id.content = post.content
+    update_post_by_id.update(post.dict(), synchronize_session=False)
 
+    db.commit()
+    return update_post_by_id.first()
+
+
+@app.post("/user", status_code=status.HTTP_201_CREATED)
+async def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
+    create_user = models.Users(**user.dict())
+    db.add(create_user)
+    db.commit()
+    db.refresh(create_user)
+    return create_user
