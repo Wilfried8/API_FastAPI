@@ -132,7 +132,7 @@ async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(ge
     return update_post_by_id.first()
 
 
-@app.post("/user", status_code=status.HTTP_201_CREATED)
+@app.post("/user", status_code=status.HTTP_201_CREATED, response_model=schema.UserOut)
 async def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
     create_user = models.Users(**user.dict())
     db.add(create_user)
