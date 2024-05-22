@@ -8,18 +8,18 @@ router = APIRouter(
     tags=["Authentification"]
 )
 
-@router.post("/login")
+@router.post("/login", response_model=schema.Token)
 async def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 
     # OAuth2PasswordRequestForm return : Username and password
     user = db.query(models.Users).filter(models.Users.email == user_credentials.username).first()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail= f"Invalid credential")
     
     if not utils.verify_password(user_credentials.password,user.password):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, 
                             detail= f"Invalid credential")
     
     #create token
@@ -30,4 +30,4 @@ async def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Ses
         }
     )
 
-    return {"access_token" : access_token, "token_type":"bearer"}
+    return {"access_token" : access_token, "token_type":"Bearer"}
