@@ -22,8 +22,8 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schema.Post])
-#async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-async def get_post(db: Session = Depends(get_db)):
+async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+#async def get_post(db: Session = Depends(get_db)):
     # cursor.execute("""  
     #         SELECT * FROM posts
     # """)
@@ -33,8 +33,8 @@ async def get_post(db: Session = Depends(get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Post)
-#async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
-async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db)):
+async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+#async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db)):
 
     # cursor.execute(
     #     """ insert into posts (title, content) values (%s, %s) RETURNING * """, (post.title, post.content)
@@ -50,8 +50,8 @@ async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db)):
     return create_post
 
 @router.get("/{id}", response_model=schema.Post)
-#async def get_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
-async def get_post(id: int, db: Session = Depends(get_db)):
+async def get_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+#async def get_post(id: int, db: Session = Depends(get_db)):
 
     # cursor.execute(
     #     """ SELECT * FROM posts WHERE id = %s RETURNING * """, (id,)
@@ -67,8 +67,8 @@ async def get_post(id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-#async def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
-async def delete_post(id: int, db: Session = Depends(get_db)):
+async def delete_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+#async def delete_post(id: int, db: Session = Depends(get_db)):
 
     # cursor.execute(
     #     """DELETE FROM posts WHERE id = %s""", (id,)
@@ -84,8 +84,8 @@ async def delete_post(id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}", response_model=schema.Post)
-#async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
-async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db)):
+async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+#async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db)):
 
     # cursor.execute(
     #     """ UPDATE posts SET tittle = %s WHERE id = %s RETURNING *""", (post.title, id)
