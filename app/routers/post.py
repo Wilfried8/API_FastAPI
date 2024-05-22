@@ -33,7 +33,7 @@ async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oa
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Post)
-async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 #async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db)):
 
     # cursor.execute(
@@ -42,7 +42,7 @@ async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db), 
     # post_p = cursor.fetchall()
     # conn.commit()
     #print(**post.dict())
-    #print(f" the id of the user is : {user_id}")
+    print(f" the id of the user is : {current_user.id} and his email is : {current_user.email}")
     create_post = models.Posts(**post.dict())
     db.add(create_post)
     db.commit()
@@ -50,7 +50,7 @@ async def create_posts(post : schema.PostCreate, db: Session = Depends(get_db), 
     return create_post
 
 @router.get("/{id}", response_model=schema.Post)
-async def get_post(id: int, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+async def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 #async def get_post(id: int, db: Session = Depends(get_db)):
 
     # cursor.execute(
@@ -84,7 +84,7 @@ async def delete_post(id: int, db: Session = Depends(get_db), current_user: int 
 
 
 @router.put("/{id}", response_model=schema.Post)
-async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 #async def update_post(id: int, post: schema.PostCreate, db: Session = Depends(get_db)):
 
     # cursor.execute(
