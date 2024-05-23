@@ -3,6 +3,7 @@ from fastapi import FastAPI, Body, Response, status, HTTPException, Depends, API
 from .. import models, schema, utils, oauth2
 from ..database import engine, get_db
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 router = APIRouter(
     prefix="/posts",
@@ -22,8 +23,8 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schema.Post])
-#async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user),limit: int = 15, skip: int = 0, search: Optional[str] =""):
-async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user),limit: int = 15, skip: int = 0, search: Optional[str] =""):
+#async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
 
 #async def get_post(db: Session = Depends(get_db)):
     # cursor.execute("""  
@@ -33,6 +34,10 @@ async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oa
     #posts = db.query(models.Posts).filter(models.Posts.owner_id == current_user.id).all()
     #posts = db.query(models.Posts).filter(models.Posts.title.contains(search)).limit(limit).offset(skip).all()
     posts = db.query(models.Posts).all()
+    # posts = db.query(models.Posts, func.count(models.Votes.post_id).label("votes")).join(
+    #     models.Votes, models.Votes.post_id == models.Posts.id, isouter=True).group_by(models.Posts.id).filter(
+    #         models.Posts.title.contains(search)).limit(limit).offset(skip)
+    # print(posts)
     return posts
 
 

@@ -5,6 +5,8 @@ from typing import Optional
 
 from pydantic.types import conint
 
+
+
 class UserBase(BaseModel):
     email: EmailStr
     password: str
@@ -39,7 +41,12 @@ class Post(PostBase):
     class Config:
         orm_mode = True
 
+class PostOut(BaseModel):
+    Post: Post
+    votes: int
 
+    class Config:
+        orm_mode = True
 
 class UserLogin(BaseModel):
     email: EmailStr
