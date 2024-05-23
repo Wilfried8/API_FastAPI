@@ -22,15 +22,17 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schema.Post])
-async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), 
-                   limit: int = 15, skip: int = 0, search: Optional[str] =""):
+#async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user),limit: int = 15, skip: int = 0, search: Optional[str] =""):
+async def get_post(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+
 #async def get_post(db: Session = Depends(get_db)):
     # cursor.execute("""  
     #         SELECT * FROM posts
     # """)
     # posts = cursor.fetchall()
     #posts = db.query(models.Posts).filter(models.Posts.owner_id == current_user.id).all()
-    posts = db.query(models.Posts).filter(models.Posts.title.contains(search)).limit(limit).offset(skip).all()
+    #posts = db.query(models.Posts).filter(models.Posts.title.contains(search)).limit(limit).offset(skip).all()
+    posts = db.query(models.Posts).all()
     return posts
 
 
