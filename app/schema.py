@@ -3,9 +3,6 @@ from typing_extensions import Annotated
 from datetime import datetime
 from typing import Optional
 
-from pydantic.types import conint
-
-
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -62,5 +59,3 @@ class TokenData(BaseModel):
 class Vote(BaseModel):
     post_id: int
     dir: Annotated[int, Field(le=1) ]
-
-

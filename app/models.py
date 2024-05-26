@@ -26,6 +26,7 @@ class Users(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()') )
+    phone_number = Column(String)
 
 
 
@@ -34,14 +35,3 @@ class Votes(Base):
 
     post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True,nullable=False)
     users_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True,nullable=False)
-
-
-# class Item(Base):
-#     __tablename__ = "items"
-
-#     id = Column(Integer, primary_key=True)
-#     title = Column(String, index=True)
-#     description = Column(String, index=True)
-#     owner_id = Column(Integer, ForeignKey("users.id"))
-
-#     owner = relationship("User", back_populates="items")
