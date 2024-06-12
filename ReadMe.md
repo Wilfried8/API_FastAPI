@@ -17,3 +17,5 @@ Exemple of .env file:
 - SECRET_KEY=hellofastapi
 - ALGORITHM=HS256
 - ACCESS_TOKEN_EXPIRE_MINUTES=15
+
+test à faire
